@@ -1,5 +1,6 @@
 package com.example.one_menu.feature.auth.view
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -32,26 +34,36 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.goodsaccounting.common.view.click.alphaClick
 import com.example.one_menu.R
+import com.example.one_menu.feature.auth.model.sign_in.SignInEvent
+import com.example.one_menu.feature.auth.model.sign_in.SignInSideEffect
+import com.example.one_menu.feature.auth.view_model.SignInViewModel
 import com.example.one_menu.feature.common.view.button.CustomButton
 import com.example.one_menu.feature.common.view.text_field.CustomTextField
 import com.example.one_menu.feature.common.view.theme.textHintColor
 import com.example.one_menu.feature.common.view.theme.textHintColor2
 import com.example.one_menu.feature.common.view.theme.textSecondaryColor
-
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 
 @Composable
 fun SignInScreen(
-    openContent: ()->Unit,
+    signInViewModel: SignInViewModel = hiltViewModel(),
+    openContent: () -> Unit,
     openRegistration: () -> Unit,
 ) {
-    var emailOrPhone by remember {
-        mutableStateOf("")
-    }
-    var password by remember {
-        mutableStateOf("")
+    val content = LocalContext.current
+    val state by signInViewModel.collectAsState()
+    signInViewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            SignInSideEffect.Authorization -> openContent()
+            is SignInSideEffect.Message -> Toast
+                .makeText(content, sideEffect.text, Toast.LENGTH_SHORT)
+                .show()
+        }
     }
     Column(
         modifier = Modifier
@@ -73,18 +85,9 @@ fun SignInScreen(
             color = textHintColor2
         )
         Spacer(modifier = Modifier.weight(1f))
-        val keyboardOptionsEmailOrPassword = remember(emailOrPhone.isBlank()) {
-            if (emailOrPhone.contains(Regex("^[0-9+]+\$"))) {
-                KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword
-                )
-            } else KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            )
-        }
         CustomTextField(
-            value = emailOrPhone,
-            onValueChange = { emailOrPhone = it },
+            value = state.emailOrPhone,
+            onValueChange = { signInViewModel.onEvent(SignInEvent.InputEmailOrPhone(it)) },
             label = {
                 Text(
                     text = stringResource(R.string.email_or_phone),
@@ -92,7 +95,7 @@ fun SignInScreen(
                     color = textHintColor.copy(0.4f)
                 )
             },
-            keyboardOptions = keyboardOptionsEmailOrPassword
+            isError = state.isErrorEmailOrPhone,
         )
         Spacer(modifier = Modifier.height(16.dp))
         var visiblePassword by remember {
@@ -105,8 +108,8 @@ fun SignInScreen(
                 VisualTransformation.None
         }
         CustomTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = state.password,
+            onValueChange = { signInViewModel.onEvent(SignInEvent.InputPassword(it)) },
             label = {
                 Text(
                     text = stringResource(R.string.type_your_password),
@@ -138,11 +141,14 @@ fun SignInScreen(
                 .alphaClick { }
         )
         Spacer(modifier = Modifier.height(37.dp))
-        CustomButton(label = stringResource(R.string.login), onClick = openContent)
+        CustomButton(
+            label = stringResource(R.string.login),
+            onClick = { signInViewModel.onEvent(SignInEvent.Login) }
+        )
         Spacer(modifier = Modifier.height(16.dp))
         GoogleButton()
         Spacer(modifier = Modifier.height(40.dp))
-        val annotatedText =buildAnnotatedString {
+        val annotatedText = buildAnnotatedString {
             withStyle(SpanStyle(color = textHintColor2)) {
                 append("${stringResource(R.string.dont_have_account)}? ")
             }
@@ -162,7 +168,7 @@ fun SignInScreen(
                 textAlign = TextAlign.Center,
             ),
             modifier = Modifier.fillMaxWidth(),
-            onClick = {offset->
+            onClick = { offset ->
                 annotatedText.getStringAnnotations(
                     tag = "SignUp", start = offset, end = offset
                 ).firstOrNull()?.let {

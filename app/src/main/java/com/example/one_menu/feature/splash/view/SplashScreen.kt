@@ -16,18 +16,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.one_menu.R
 import com.example.one_menu.feature.common.view.theme.textSecondaryColor
+import com.example.one_menu.feature.splash.model.SplashSideEffect
+import com.example.one_menu.feature.splash.view_model.SplashViewModel
 import kotlinx.coroutines.delay
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun SplashScreen(
-    goToAuth: ()-> Unit
+    splashViewModel: SplashViewModel = hiltViewModel(),
+    goToAuth: ()-> Unit,
+    goToMainContent: ()->Unit,
 ) {
-
-    LaunchedEffect(Unit){
-        delay(500)
-        goToAuth()
+    splashViewModel.collectSideEffect{sideEffect->
+        when(sideEffect){
+            SplashSideEffect.Authorized -> goToMainContent()
+            SplashSideEffect.NeedToSignIn -> goToAuth()
+        }
     }
     Box(
         modifier = Modifier

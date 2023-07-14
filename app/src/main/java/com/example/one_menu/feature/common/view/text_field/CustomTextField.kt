@@ -59,13 +59,17 @@ fun CustomTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     label: @Composable (() -> Unit)? = null,
     leftIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    readOnly: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     var isFocus by remember {
         mutableStateOf(false)
     }
     val animColor by animateColorAsState(
-        targetValue = if (isFocus) MaterialTheme.colors.primary else Color(0xFFEEEEEE),
+        targetValue =  if (isError) MaterialTheme.colors.error else
+            if (isFocus) MaterialTheme.colors.primary else Color(0xFFEEEEEE),
         animationSpec = tween(
             durationMillis = 300,
         )
@@ -100,6 +104,8 @@ fun CustomTextField(
         cursorBrush = SolidColor(MaterialTheme.colors.primary),
         keyboardOptions = keyboardOptions,
         visualTransformation = visualTransformation,
+        readOnly= readOnly,
+        enabled = enabled,
     ){ innerTextField ->
         Row(
             verticalAlignment = Alignment.CenterVertically,

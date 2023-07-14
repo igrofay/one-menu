@@ -1,1 +1,0 @@
-package com.example.one_menu.domain

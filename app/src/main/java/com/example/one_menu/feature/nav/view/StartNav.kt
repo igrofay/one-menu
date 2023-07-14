@@ -19,11 +19,18 @@ fun NavGraphBuilder.startNav(
         route = StartRouting.route
     ) {
         composable(StartRouting.Splash.route) {
-            SplashScreen {
-                appNavController.navigate(StartRouting.SignIn.route) {
-                    popUpTo(StartRouting.Splash.route) { inclusive = true }
+            SplashScreen(
+                goToAuth =  {
+                    appNavController.navigate(StartRouting.SignIn.route) {
+                        popUpTo(StartRouting.Splash.route) { inclusive = true }
+                    }
+                },
+                goToMainContent =  {
+                    appNavController.navigate(MainRouting.route) {
+                        popUpTo(StartRouting.Splash.route) { inclusive = true }
+                    }
                 }
-            }
+            )
         }
         composable(StartRouting.SignIn.route) {
             SignInScreen(
@@ -39,7 +46,10 @@ fun NavGraphBuilder.startNav(
         }
         composable(StartRouting.SignUp.route){
             SignUpScreen {
-                appNavController.navigate(StartRouting.VerificationCode.route)
+                appNavController.navigate(MainRouting.route) {
+                    popUpTo(StartRouting.SignIn.route) { inclusive = true }
+                }
+//                appNavController.navigate(StartRouting.VerificationCode.route)
             }
         }
         composable(StartRouting.VerificationCode.route){

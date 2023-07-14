@@ -43,12 +43,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.goodsaccounting.common.view.click.alphaClick
 import com.example.one_menu.R
+import com.example.one_menu.domain.model.menu.RestaurantModel
 import com.example.one_menu.feature.common.view.button.CustomButton
 import com.example.one_menu.feature.nav.view.LocalBottomNavBarSetting
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun InformationAboutInstitutionScreen(
+    restaurantModel: RestaurantModel,
     next: ()->Unit,
     back: () -> Unit,
 ) {
@@ -85,14 +89,14 @@ fun InformationAboutInstitutionScreen(
                     )
                     Spacer(modifier = Modifier.height(38.dp))
                     Text(
-                        text = "Plov Lounge",
+                        text = restaurantModel.name,
                         fontSize = 27.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(horizontal = 10.dp)
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(
-                        text = "Most whole Alaskan Red King Crabs get broken down into legs, claws, and lump meat. We offer all of these options as well in our online shop, but there is nothing like getting the whole . . . .",
+                        text = restaurantModel.description,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 10.dp)
                     )
@@ -106,14 +110,15 @@ fun InformationAboutInstitutionScreen(
             sheetShape = RoundedCornerShape(topEnd = 25.dp, topStart = 25.dp),
         ) {
             Box {
-                Image(
-                    painter = painterResource(R.drawable.im_plov_lounge),
-                    contentDescription = null,
+                GlideImage(
+                    imageModel = {restaurantModel.image ?: R.drawable.im_plov_lounge},
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .height(maxHeight / 1.5f),
-                    contentScale = ContentScale.Crop,
+                    imageOptions = ImageOptions(
+                        contentScale = ContentScale.Crop
+                    )
                 )
                 Box(
                     modifier = Modifier

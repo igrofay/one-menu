@@ -1,14 +1,10 @@
 package com.example.one_menu.feature.menu.view
 
 import android.Manifest
-import android.content.Context
-import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -30,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -53,7 +45,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun QRReaderScreen(
     openNotification: ()-> Unit,
-    openInformationInstitution: ()->Unit,
+    openInformationRestaurant: (String)->Unit,
 ) {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -69,7 +61,7 @@ fun QRReaderScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ){
-        val codeScanner = rememberCodeScannerView(openInformationInstitution)
+        val codeScanner = rememberCodeScannerView(openInformationRestaurant)
         AndroidView(
             factory = { codeScanner },
             modifier = Modifier.fillMaxSize()
@@ -119,7 +111,7 @@ fun QRReaderScreen(
 
 @Composable
 fun rememberCodeScannerView(
-    onQRCodeRead : ()-> Unit
+    onQRCodeRead : (String)-> Unit
 ) : CodeScannerView{
     val context = LocalContext.current
     val codeScannerView = remember { CodeScannerView(context).apply {
@@ -138,7 +130,7 @@ fun rememberCodeScannerView(
             isFlashEnabled = false
             decodeCallback = DecodeCallback {
                 localCoroutine.launch {
-                    onQRCodeRead()
+                    onQRCodeRead(it.text)
                 }
             }
         }

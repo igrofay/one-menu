@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -50,42 +52,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.goodsaccounting.common.view.click.alphaClick
 import com.example.one_menu.R
-import com.example.one_menu.feature.menu.model.ProductInfo
+import com.example.one_menu.domain.model.menu.MenuCategoryModel
+import com.example.one_menu.domain.model.menu.MenuDishModel
+import com.example.one_menu.domain.model.menu.RestaurantModel
 import com.example.one_menu.feature.nav.view.LocalBottomNavBarSetting
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.launch
+import java.util.Currency
 
-val category = listOf("All View", "Pizza", "Burger")
-
-val listPizza = listOf(
-    ProductInfo(
-        name = "Margarita",
-        components = "600 gr dough + tomato sauce + cheese + basil",
-        price = "40.00",
-        previewImage = R.drawable.im_margarita,
-        aboutProduct = "Margherita pizza is a classic Italian dish that features a thin crust topped with grated ripe tomato, fresh mozzarella cheese, and fragrant basil. It delights food enthusiasts worldwide with its delicate flavor. The thin crust becomes crispy during baking, complementing the tangy tomato sauce that adds a hint of zest. The melted mozzarella cheese creates a creamy texture, while the fresh basil leaves contribute aroma and freshness. All the ingredients come together in a harmonious composition, creating a perfect blend of simple yet exquisite flavors. Margherita pizza is the epitome of Italian gastronomy, enchanting palates with its tender and classic taste.",
-        category = "Pizza",
-        mainImage = R.drawable.im_margarita_pizza_main,
-    )
-)
-val listBurger = listOf(
-    ProductInfo(
-        name = "Chicken burger",
-        components = "200 gr chicken + cheese  Lettuce + tomato",
-        price = "22.00",
-        previewImage = R.drawable.im_chicken_burger,
-        aboutProduct = "Chicken Burger - It's a flavorful burger consisting of a juicy chicken patty, creamy cheese, fresh lettuce leaves, a slice of tomato, all nestled between a soft bun. The chicken patty adds succulence and a tender taste, while the melted cheese provides a smooth texture. The crisp lettuce leaves and the slice of tomato bring freshness and a satisfying crunch. The combination of these ingredients creates a unique flavor profile that is sure to delight your taste buds.",
-        category = "Burger",
-        mainImage = R.drawable.im_chicken_burger_main
-    )
-)
-
-val all = listBurger + listPizza
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MenuInstitutionScreen(
+    restaurantModel : RestaurantModel,
+    listCategory: List<MenuCategoryModel>,
+    dishes: Map<Int, List<MenuDishModel>>,
     back: () -> Unit,
-    openProduct: (id:String)->Unit
+    openProduct: (MenuDishModel)->Unit
 ) {
     val bottomNavBarSetting = LocalBottomNavBarSetting.current
     LaunchedEffect(Unit) {
@@ -115,7 +99,7 @@ fun MenuInstitutionScreen(
                 )
             }
             Text(
-                text = "Plov Lounge",
+                text = restaurantModel.name,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.Center)
@@ -134,14 +118,14 @@ fun MenuInstitutionScreen(
             contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            itemsIndexed(category) { index, item ->
+            itemsIndexed(listCategory) { index, item ->
                 val animColorBack by animateColorAsState(
                     targetValue = if (index == pagerState.currentPage)
                         MaterialTheme.colors.primary
                     else Color.Transparent
                 )
                 Text(
-                    text = item,
+                    text = item.name,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
@@ -158,23 +142,23 @@ fun MenuInstitutionScreen(
         }
         Spacer(modifier = Modifier.height(8.dp))
         HorizontalPager(
-            pageCount = category.size,
+            pageCount = listCategory.size,
             state = pagerState,
             modifier = Modifier.padding(
                 bottom = bottomNavBarSetting?.bottomPaddingValues ?: 0.dp
             )
         ) {
-            when(it){
-                0-> ListProduct(products = all, open = openProduct)
-                1-> ListProduct(products = listPizza, open = openProduct)
-                2-> ListProduct(products = listBurger, open = openProduct)
-            }
+            val category = listCategory[it]
+            ListProduct(
+                products = dishes[category.id] ?: listOf(),
+                open = openProduct
+            )
         }
     }
 }
 
 @Composable
-private fun ListProduct(products: List<ProductInfo>, open: (id: String)->Unit) {
+private fun ListProduct(products: List<MenuDishModel>, open: (MenuDishModel)->Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
@@ -190,20 +174,35 @@ private fun ListProduct(products: List<ProductInfo>, open: (id: String)->Unit) {
                     .shadow(2.dp, MaterialTheme.shapes.medium)
                     .background(MaterialTheme.colors.background, MaterialTheme.shapes.medium)
                     .clip(MaterialTheme.shapes.medium)
-                    .clickable{
-                        open(product.id)
+                    .clickable {
+                        open(product)
                     }
                     .padding(horizontal = 12.dp)
-                    .padding(bottom = 8.dp, top = 27.dp),
+                    .padding(bottom = 8.dp, top = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = painterResource(product.previewImage),
-                    contentDescription = null,
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 15.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    for (i in 0 until product.spicinessLevel) {
+                        Image(
+                            painter = painterResource(R.drawable.im_hot),
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
+                        )
+                    }
+                }
+                GlideImage(
+                    imageModel = { product.image },
                     modifier = Modifier
                         .height(70.dp)
                         .fillMaxWidth(),
-                    contentScale = ContentScale.FillHeight
+                    imageOptions = ImageOptions(
+                        contentScale = ContentScale.FillHeight,
+                    )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -218,13 +217,13 @@ private fun ListProduct(products: List<ProductInfo>, open: (id: String)->Unit) {
                     fontSize = 12.sp,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                val splitPrice = remember(product.price){
-                    product.price.split('.')
+                val splitPrice = remember(product.price) {
+                    product.price.toString().split('.')
                 }
                 Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold)){
-                            append("$ ${splitPrice.first()}.")
+                            append("${Currency.getInstance(product.currency).symbol} ${splitPrice.first()}.")
                         }
                         withStyle(SpanStyle(fontSize = 10.sp, fontWeight = FontWeight.Medium)){
                             append(splitPrice.last())

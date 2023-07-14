@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,11 +31,13 @@ fun CustomButton(
         fontWeight = FontWeight.SemiBold,
     ),
     shape: Shape = MaterialTheme.shapes.large,
+    enabled: Boolean = true,
     onClick:()->Unit,
 ) {
     Box(
         modifier = modifier
-            .scaleClick(onClick = onClick)
+            .alpha(if (enabled) 1f else 0.7f)
+            .scaleClick(enabled = enabled, onClick = onClick)
             .fillMaxWidth()
             .background(MaterialTheme.colors.primary, shape )
             .padding(paddingValues),

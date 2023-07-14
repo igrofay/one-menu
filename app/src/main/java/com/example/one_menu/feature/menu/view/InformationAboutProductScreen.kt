@@ -2,9 +2,11 @@ package com.example.one_menu.feature.menu.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,13 +39,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.goodsaccounting.common.view.click.alphaClick
 import com.example.one_menu.R
-import com.example.one_menu.feature.menu.model.ProductInfo
+import com.example.one_menu.domain.model.menu.MenuDishModel
 import com.example.one_menu.feature.nav.view.LocalBottomNavBarSetting
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.glide.GlideImage
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun InformationAboutProductScreen(
-    product : ProductInfo,
+    product : MenuDishModel,
     back: ()->Unit
 ) {
     val bottomNavBarSetting = LocalBottomNavBarSetting.current
@@ -63,14 +67,29 @@ fun InformationAboutProductScreen(
                         .padding(horizontal = 20.dp)
                 ) {
                     Spacer(modifier = Modifier.height(38.dp))
-                    Text(
-                        text = product.name,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    Row{
+                        Text(
+                            text = product.name,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (product.spicinessLevel != 0)
+                            Row(
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                for (i in 0 until product.spicinessLevel) {
+                                    Image(
+                                        painter = painterResource(R.drawable.im_hot),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                            }
+                    }
                     Spacer(modifier = Modifier.height(20.dp))
                     val splitPrice = remember(product.price){
-                        product.price.split('.')
+                        product.price.toString().split('.')
                     }
                     Text(
                         text = buildAnnotatedString {
@@ -91,7 +110,7 @@ fun InformationAboutProductScreen(
                         fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(text = product.aboutProduct, fontSize = 14.sp,)
+                    Text(text = product.description, fontSize = 14.sp,)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             },
@@ -100,14 +119,15 @@ fun InformationAboutProductScreen(
             sheetShape = RoundedCornerShape(topEnd = 25.dp, topStart = 25.dp),
         ){
             Box {
-                Image(
-                    painter = painterResource(product.mainImage),
-                    contentDescription = null,
+                GlideImage(
+                    imageModel = {product.image},
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .height(maxHeight / 2f),
-                    contentScale = ContentScale.Crop,
+                    imageOptions = ImageOptions(
+                        contentScale = ContentScale.Crop
+                    )
                 )
                 Box(
                     modifier = Modifier

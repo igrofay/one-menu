@@ -41,7 +41,7 @@ fun Modifier.alphaClick(enabled: Boolean = true, alpha: Float =  0.7f,onClick: (
                 MutableInteractionSource()
             },
             indication = null,
-                    enabled = enabled,
+            enabled = enabled,
             onClick = onClick
         )
         .pointerInput(state) {

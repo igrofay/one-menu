@@ -5,11 +5,7 @@ sealed class MenuRouting(val route : String){
     object Notifications : MenuRouting("${route}_notifications")
     object InformationAboutInstitution : MenuRouting("${route}_information_about_institution")
     object MenuInstitution : MenuRouting("${route}_menu_institution")
-    object InformationAboutProduct : MenuRouting("${route}_information_about_product"){
-        val arg1 = "productId"
-        fun allRoute() = "$route/{$arg1}"
-        fun allRoute(productId: String) = "$route/$productId"
-    }
+    object InformationAboutProduct : MenuRouting("${route}_information_about_product")
     companion object{
         val route = "menu_routing"
     }

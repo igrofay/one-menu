@@ -77,7 +77,7 @@ fun NotificationsScreen(
                 top = 12.dp
             )
         ) {
-            items(5) {
+            items(0) {
                 ItemNotification(item = it + 1)
             }
         }

@@ -35,4 +35,5 @@
     <string name="submit">Submit</string>
     <string name="didnt_receive_code">Didn’t receive the code</string>
     <string name="resend">Resend</string>
+    <string name="password">Password</string>
 </resources>
